@@ -34,10 +34,15 @@ let htmlBoard = document.getElementById('board');
   // TODO: add comment for this code
   var top = document.createElement("tr");
   top.setAttribute("id", "column-top");
+  top.classList.add('playerhov-1')
   top.addEventListener("click", handleClick);
 
   for (var x = 0; x < WIDTH; x++) {
     var headCell = document.createElement("td");
+    var piece = document.createElement('div');
+    piece.classList.add('piece');
+    piece.setAttribute("id", x);
+    headCell.append(piece);
     headCell.setAttribute("id", x);
     top.append(headCell);
   }
@@ -62,11 +67,7 @@ function findSpotForCol(x) {
       rowNum++;
     }
   }
-  if (rowNum == board.length) {
-    rowNum -1;
-  }
-  console.log(rowNum -1 + " - this is the returned row");
-  return rowNum - 1;
+  return rowNum - 1; // -1 to account for the top row
 }
 
 /** placeInTable: update DOM to place piece into HTML table of board */
@@ -74,10 +75,8 @@ function findSpotForCol(x) {
 function placeInTable(y, x) {
   let htmlBoard = document.getElementById('board');
   let cellNum = y + '-' + x;
-  console.log(cellNum);
   let cell = document.getElementById(cellNum);
   let piece = document.createElement('div');
-  console.log(cell);
   cell.classList.add('player-'+currPlayer);
   piece.classList.add('piece');
   cell.append(piece);
@@ -85,15 +84,16 @@ function placeInTable(y, x) {
 
 
 function endGame(msg) {
-  window.alert(msg);
+  setTimeout(() => {
+    alert(msg)
+  }, 200)
 }
 
 /** handleClick: handle click of column top to play piece */
 
 function handleClick(evt) {
   // get x from ID of clicked cell
-  var x = +evt.target.id;
-
+  var x = + evt.target.id;
   // get next spot in column (if none, ignore click)
   var y = findSpotForCol(x);
   if (y === null) {
@@ -112,7 +112,6 @@ function handleClick(evt) {
   // check for tie
   // TODO: check if all cells in board are filled; if so call, call endGame
   function checkBoardStatus() {
-    console.log('checking board status');
     return boardFull = board.every(function(row){
       return row.every(function(column) {
         return column != '';
@@ -125,9 +124,14 @@ function handleClick(evt) {
   }
 
   // switch players
+  let top = document.getElementById('column-top');
   if (currPlayer == 1) {
+    top.classList.remove('playerhov-1');
+    top.classList.add('playerhov-2');
     currPlayer = 2;
   } else {
+    top.classList.remove('playerhov-2');
+    top.classList.add('playerhov-1');
     currPlayer = 1;
   }
 }
@@ -139,8 +143,7 @@ function checkForWin() {
     // Check four cells to see if they're all color of current player
     //  - cells: list of four (y, x) cells
     //  - returns true if all are legal coordinates & all match currPlayer
-
-    return cells.every(
+    let results = cells.every(
       ([y, x]) =>
         y >= 0 &&
         y < HEIGHT &&
@@ -148,6 +151,14 @@ function checkForWin() {
         x < WIDTH &&
         board[y][x] === currPlayer //checks to see if the board value === current player value
     );
+    if (results) {
+      console.log(cells);
+      for(position of cells) {
+        let cell = document.getElementById(position[0]+"-"+position[1]);
+        cell.classList.add('win-'+currPlayer);
+      }
+    }
+    return results;
   }
 
 
